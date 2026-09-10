@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Charts — CYBER MUSIC</title>
+<meta name="description" content="Billboard Hot 100 e notas regionais. Dados de data/charts.json — sem posições inventadas.">
+<link rel="canonical" href="https://mozalltech.github.io/An-ncio-/charts.html">
+<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<header class="site-header">
+<div class="header-inner container">
+<a href="index.html" class="logo"><span class="logo-icon">▶</span> CYBER MUSIC</a>
+<nav class="nav-main" aria-label="Main">
+<a href="index.html">Home</a>
+<a href="charts.html" class="active">Charts</a>
+<a href="news.html">News</a>
+<a href="artists.html">Artists</a>
+<a href="albums.html">Albums</a>
+<a href="music.html">Music</a>
+<a href="mozambique.html">Moçambique</a>
+<a href="about.html">About</a>
+</nav>
+<button class="menu-toggle" aria-label="Menu">☰</button>
+</div>
+</header>
+<div class="cyber-ticker" aria-hidden="true"><div class="ticker-track">
+<span class="ticker-item"><span class="dot"></span> CHARTS · SOURCE-DATED · NO INVENTED POSITIONS</span>
+</div></div>
+<main class="main-content">
+<section class="section container">
+<h1 class="section-title">Charts</h1>
+<p id="charts-meta" style="color:var(--text-muted);margin-bottom:1.5rem;">Loading chart metadata…</p>
+<div id="dynamic-charts"><p style="color:#666">Loading charts…</p></div>
+<p class="chart-source" id="chart-source-line" style="margin-top:1rem;color:var(--text-muted);font-size:.85rem;"></p>
+<h2 class="section-title" style="margin-top:3rem;">Notas — África / Moçambique</h2>
+<p style="color:var(--text-secondary);max-width:680px;">Charts locais e playlists Amapiano em 2026 mostram circulação de produtores e artistas da região (Sam Deep, Kabza De Small e nomes da cena moçambicana). Dados de referência pública; posições exactas mudam frequentemente.</p>
+</section>
+</main>
+<footer class="site-footer"><div class="container"><div class="footer-bottom"><span>© 2026 Cyber Music</span><a href="index.html">Home</a></div></div></footer>
+<script src="js/app.js" defer></script>
+<script src="js/player.js" defer></script>
+<script>
+(async function(){
+  try {
+    const res = await fetch('data/charts.json');
+    const data = await res.json();
+    const rows = data.usHot100 || data.globalTopSongs || [];
+    const el = document.getElementById('dynamic-charts');
+    const meta = document.getElementById('charts-meta');
+    const srcLine = document.getElementById('chart-source-line');
+    const chartDate = data.chartDate || '';
+    // Factual date wording — do not claim published if labeled as reference week
+    meta.textContent = (data.chartName || data.source || 'Billboard Hot 100') +
+      (chartDate ? ' · Chart week reference: ' + chartDate : '') +
+      (data.lastUpdated ? ' · Site data updated: ' + data.lastUpdated : '');
+    if (data.note) {
+      meta.textContent += '';
+    }
+    el.innerHTML = rows.map(function(item){
+      const ytid = item.youtube || '';
+      const play = ytid
+        ? '<button class="btn-icon" data-play="'+(item.songId||item.id||'')+'" title="Play">▶</button>'
+        : '<button class="btn-icon" title="OFFICIAL PREVIEW UNAVAILABLE" onclick="CyberPlayer.unavailable&&CyberPlayer.unavailable()">▶</button>';
+      // Try match song by title for play
+      const playAttr = item.songId ? 'data-play="'+item.songId+'"' : '';
+      return '<div class="chart-row" id="pos-'+item.position+'" data-pos="'+item.position+'">'+
+        '<span class="chart-pos">'+item.position+'</span>'+
+        '<div class="chart-info"><strong>'+item.song+'</strong> <span>'+item.artist+'</span></div>'+
+        '<span class="chart-meta">'+(item.weeksAtOne ? item.weeksAtOne+' wks #1' : (item.peak ? 'Peak '+item.peak : ''))+'</span>'+
+        (item.songId ? '<button class="btn-icon" data-play="'+item.songId+'" title="Play">▶</button>' :
+          '<button class="btn-icon" title="OFFICIAL PREVIEW UNAVAILABLE" onclick="CyberPlayer.unavailable&&CyberPlayer.unavailable()">▶</button>')+
+        '</div>';
+    }).join('') || '<p>No chart rows in data/charts.json.</p>';
+    srcLine.textContent = 'Source: '+(data.source||'Billboard')+(data.sourceUrl?' · '+data.sourceUrl:'')+
+      (data.note ? ' · '+data.note.slice(0,180)+'…' : '');
+  } catch(e) {
+    document.getElementById('dynamic-charts').innerHTML = '<p>Could not load charts data.</p>';
+  }
+})();
+</script>
+</body>
+</html>

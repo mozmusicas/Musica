@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music — CYBER MUSIC</title>
+<meta name="description" content="30 músicas verificadas com previews oficiais YouTube quando disponíveis.">
+<link rel="canonical" href="https://mozalltech.github.io/An-ncio-/music.html">
+<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<header class="site-header">
+<div class="header-inner container">
+<a href="index.html" class="logo"><span class="logo-icon">▶</span> CYBER MUSIC</a>
+<nav class="nav-main" aria-label="Main">
+<a href="index.html">Home</a>
+<a href="charts.html">Charts</a>
+<a href="news.html">News</a>
+<a href="artists.html">Artists</a>
+<a href="albums.html">Albums</a>
+<a href="music.html" class="active">Music</a>
+<a href="mozambique.html">Moçambique</a>
+<a href="about.html">About</a>
+</nav>
+<button class="menu-toggle" aria-label="Menu">☰</button>
+</div>
+</header>
+<div class="cyber-ticker" aria-hidden="true"><div class="ticker-track">
+<span class="ticker-item"><span class="dot"></span> MUSIC CATALOG · OFFICIAL PREVIEWS ONLY</span>
+</div></div>
+<main class="main-content">
+<section class="section container">
+<h1 class="section-title">Music</h1>
+<p style="color:var(--text-muted);margin-bottom:2rem;max-width:640px;">Catálogo de <code>data/songs.json</code>. Play usa YouTube oficial quando o ID está verificado; caso contrário: Official preview unavailable.</p>
+<div class="cards-grid" id="songs-grid"><p style="color:#666">Loading songs…</p></div>
+</section>
+</main>
+<footer class="site-footer"><div class="container"><div class="footer-bottom"><span>© 2026 Cyber Music</span><a href="index.html">Home</a></div></div></footer>
+<script src="js/app.js" defer></script>
+<script src="js/player.js" defer></script>
+<script>
+(async function(){
+  try {
+    const res = await fetch('data/songs.json');
+    const data = await res.json();
+    const grid = document.getElementById('songs-grid');
+    const params = new URLSearchParams(location.search);
+    const focus = params.get('song');
+    grid.innerHTML = (data.songs || []).map(s => {
+      const ytid = s.youtube || s.youtubeId || '';
+      const img = ytid
+        ? '<img src="https://i.ytimg.com/vi/'+ytid+'/hqdefault.jpg" alt="'+s.title+'" loading="lazy" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;margin-bottom:.75rem;border:1px solid #1e1e2a">'
+        : '<div style="width:100%;aspect-ratio:16/9;background:#12121a;border-radius:8px;margin-bottom:.75rem;display:flex;align-items:center;justify-content:center;color:#445;font-size:.8rem">No preview</div>';
+      const playBtn = ytid
+        ? '<button class="btn-icon" data-play="'+s.id+'" title="Play official preview">▶</button>'
+        : '<button class="btn-icon" title="OFFICIAL PREVIEW UNAVAILABLE" onclick="CyberPlayer.unavailable && CyberPlayer.unavailable()">▶</button>';
+      const hl = focus && (s.id===focus || s.title===focus) ? 'outline:2px solid #00e5ff' : '';
+      return '<article class="card" id="song-'+s.id+'" style="'+hl+'"><div class="card-body">'+img+
+        '<div class="card-category">'+(s.genre||'')+'</div>'+
+        '<h2 class="card-title">'+s.title+'</h2>'+
+        '<p style="color:var(--text-secondary);font-size:0.9rem">'+s.artist+'</p>'+
+        '<div style="margin-top:.75rem;display:flex;gap:.5rem;align-items:center">'+playBtn+
+        (ytid?'<a href="https://www.youtube.com/watch?v='+ytid+'" target="_blank" rel="noopener" style="color:#00e5ff;font-size:.85rem">YouTube ↗</a>':'<span style="color:#666;font-size:.8rem">Official preview unavailable</span>')+
+        '</div></div></article>';
+    }).join('');
+    if (focus) {
+      const el = document.getElementById('song-'+focus);
+      if (el) el.scrollIntoView({behavior:'smooth',block:'center'});
+    }
+  } catch(e) {
+    document.getElementById('songs-grid').innerHTML = '<p>Could not load songs data.</p>';
+  }
+})();
+</script>
+</body>
+</html>
